@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Friendship dice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Ultra for main title -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ultra&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --pink-bg: #F57F8E;
+      --dark: #383232;
+      --red-accent: #E00923;
+      --cream-card: #FFF4E3;
+      --cta-text: #FFF5E2;
+
+      --title-font: "Ultra", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --body-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--pink-bg);
+      color: var(--dark);
+      font-family: var(--body-font);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    #friendship-dice-app {
+      width: 100%;
+      max-width: 600px;
+      padding: 1.6rem 1.2rem 1.6rem;
+      margin: 0 auto;
+    }
+
+    /* simple vertical spacing helpers */
+    .section-space-sm { margin-block: 1.3rem; }
+    .section-space     { margin-block: 1.3rem; }
+    .section-space-lg  { margin-block: 1.8rem; }
+
+    /* Card + pow shapes */
+
+    .card-wrapper {
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .pow {
+      position: absolute;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* large visible shapes behind the card */
+    .pow-left {
+      left: -125px;
+      top: 70px;
+      width: 280px;
+    }
+
+    .pow-right {
+      right: -125px;
+      bottom: -100px;
+      width: 300px;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--cream-card);
+      border-radius: 28px;
+      padding: 1.6rem 1.4rem 1.6rem;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+      text-align: center;
+    }
+
+    .title {
+      font-family: var(--title-font);
+      text-transform: uppercase;
+      font-size: 2rem;
+      line-height: 1.5;
+      letter-spacing: 0.04em;
+      color: var(--red-accent);
+    }
+
+    .intro,
+    .subline {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      letter-spacing: 0.02em;
+      font-weight: 600;
+    }
+
+    .intro strong {
+      font-weight: 800;
+    }
+
+    .dice-row {
+      display: flex;
+      justify-content: center;
+      gap: 2.4rem;
+      align-items: flex-start;
+    }
+
+    .die-wrapper {
+      flex: 1;
+      max-width: 200px;
+    }
+
+    .die {
+      width: 145px;
+      height: auto;
+      display: block;
+      cursor: pointer;
+      margin: 0 auto 0.5rem;
+      transform-origin: center;
+      transition: transform 0.15s ease;
+    }
+
+    #invite-die {
+      transform: rotate(-5deg);
+    }
+
+    #talk-die {
+      transform: rotate(4deg);
+    }
+
+    .die:active {
+      transform: scale(0.98);
+    }
+
+    .die.rolling {
+      animation: dice-shake 0.45s ease-in-out;
+    }
+
+    @keyframes dice-shake {
+      0%   { transform: rotate(0deg); }
+      20%  { transform: rotate(6deg); }
+      40%  { transform: rotate(-6deg); }
+      60%  { transform: rotate(4deg); }
+      80%  { transform: rotate(-4deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .die-label {
+      font-size: 0.95rem;
+      text-transform: none;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.35rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .result-text {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 0.2rem;
+      opacity: 1;
+      transition: opacity 0.2s ease;
+    }
+
+    .result-text.empty {
+      opacity: 0;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    button {
+      font-family: var(--body-font);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.6rem 1.8rem;
+      cursor: pointer;
+      border-radius: 999px;
+      border: 2px solid var(--dark);
+      background: transparent;
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    #roll-both {
+      background: var(--red-accent);
+      border: none;
+      color: var(--cta-text);
+      padding-inline: 2.1rem;
+    }
+
+    #clear {
+      background: transparent;
+    }
+
+    button:hover {
+      filter: brightness(0.96);
+    }
+
+    .outro {
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      font-weight: 600;
+    }
+
+    /* mobile tweaks to keep everything above the fold */
+    @media (max-width: 460px) {
+      #friendship-dice-app {
+        padding: 1.2rem 0.6rem 1.2rem;
+      }
+
+      .card {
+        padding: 1.2rem 0.9rem 1.3rem;
+        border-radius: 24px;
+      }
+
+      .title {
+        font-size: 1.9rem;
+      }
+
+      .intro,
+      .subline {
+        font-size: 0.95rem;
+      }
+
+      .dice-row {
+        gap: 1.4rem;
+      }
+
+      .die {
+        width: 110px;
+        margin-bottom: 0.4rem;
+      }
+
+      .section-space-lg { margin-block: 0.8rem; }
+      .section-space     { margin-block: 0.6rem; }
+      .section-space-sm  { margin-block: 0.35rem; }
+
+      .pow-left {
+        left: -70px;
+        top: 110px;
+        width: 220px;
+      }
+
+      .pow-right {
+        right: -70px;
+        bottom: -55px;
+        width: 240px;
+      }
+
+      button {
+        font-size: 0.9rem;
+        padding: 0.55rem 1.4rem;
+      }
+
+      .outro {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="friendship-dice-app">
+    <div class="card-wrapper">
+      <!-- pow shapes behind the card -->
+      <img src="Dice illustrations/pow1.png" class="pow pow-left" alt="">
+      <img src="Dice illustrations/pow2.png" class="pow pow-right" alt="">
+
+      <div class="card">
+        <h1 class="title section-space-sm">FRIENDSHIP DICE</h1>
+
+        <p class="intro section-space-sm">
+          Let's <strong>not</strong> get a coffee. Instead, roll the dice:
+        </p>
+
+        <div class="dice-row section-space-lg">
+          <div class="die-wrapper">
+            <img
+              id="invite-die"
+              class="die"
+              src="Dice illustrations/1.png"
+              data-face="1"
+              alt="Invite die"
+            />
+            <p class="die-label">Invite a friend to…</p>
+            <p class="result-text empty" id="invite-text"></p>
+          </div>
+
+          <div class="die-wrapper">
+            <img
+              id="talk-die"
+              class="die"
+              src="Dice illustrations/3.png"
+              data-face="3"
+              alt="Talk die"
+            />
+            <p class="die-label">And talk about…</p>
+            <p class="result-text empty" id="talk-text"></p>
+          </div>
+        </div>
+
+        <div class="buttons section-space">
+          <button id="roll-both">Roll both</button>
+          <button id="clear">Clear</button>
+        </div>
+
+        <p class="outro section-space-sm">
+          Screenshot &amp; send to a friend!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const app = document.querySelector("#friendship-dice-app");
+      if (!app) return;
+
+      const inviteDie = app.querySelector("#invite-die");
+      const talkDie = app.querySelector("#talk-die");
+      const inviteTextEl = app.querySelector("#invite-text");
+      const talkTextEl = app.querySelector("#talk-text");
+      const rollBothBtn = app.querySelector("#roll-both");
+      const clearBtn = app.querySelector("#clear");
+
+      const diceImages = {
+        1: "Dice illustrations/1.png",
+        2: "Dice illustrations/2.png",
+        3: "Dice illustrations/3.png",
+        4: "Dice illustrations/4.png",
+        5: "Dice illustrations/5.png",
+        6: "Dice illustrations/6.png"
+      };
+
+      const invitePool = [
+        "Go for a slow walk somewhere green.",
+        "Explore the botanical garden together.",
+        "Visit a museum or gallery you’ve never tried before.",
+        "Meet at a park with a thermos instead of a café.",
+        "Do a second-hand shop or flea market stroll.",
+        "Try a new bakery or cheap dessert place.",
+        "Have a board game or card night at home.",
+        "Take a tram or bus ride to a neighbourhood you don’t usually visit.",
+        "Watch a film at the cinema and talk after.",
+        "Go to the library and sit in the quiet together.",
+        "Cook something simple at one of your homes.",
+        "Do a “working date” where you co-work and chat in the breaks."
+      ];
+
+      const talkPool = [
+        "How this year has actually felt, not just the headlines.",
+        "One decision you’re glad you made in the last year.",
+        "Something you’re quietly worried about at the moment.",
+        "A habit you’d like to build, and why.",
+        "A way you’ve changed since you first met.",
+        "A small regret you’re trying to make peace with.",
+        "What “home” means to you right now.",
+        "A friendship you admire and why.",
+        "One thing you miss from an earlier version of your life.",
+        "Something you’re genuinely looking forward to.",
+        "A tiny boundary you’re trying to keep for yourself.",
+        "A memory you have together that still feels vivid."
+      ];
+
+      function randomItem(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function rollDie(imgEl, textEl, pool) {
+        if (!imgEl) return;
+
+        imgEl.classList.add("rolling");
+
+        const duration = 450;
+        const shuffleInterval = 70;
+        const start = performance.now();
+
+        const intervalId = setInterval(() => {
+          const now = performance.now();
+          if (now - start >= duration) {
+            clearInterval(intervalId);
+
+            const finalFace = 1 + Math.floor(Math.random() * 6);
+            imgEl.dataset.face = finalFace;
+            imgEl.src = diceImages[finalFace] || imgEl.src;
+            imgEl.classList.remove("rolling");
+
+            const text = randomItem(pool);
+            textEl.textContent = text;
+            textEl.classList.remove("empty");
+          } else {
+            const tempFace = 1 + Math.floor(Math.random() * 6);
+            imgEl.dataset.face = tempFace;
+            imgEl.src = diceImages[tempFace] || imgEl.src;
+          }
+        }, shuffleInterval);
+      }
+
+      inviteDie.addEventListener("click", () => {
+        rollDie(inviteDie, inviteTextEl, invitePool);
+      });
+
+      talkDie.addEventListener("click", () => {
+        rollDie(talkDie, talkTextEl, talkPool);
+      });
+
+      rollBothBtn.addEventListener("click", () => {
+        rollDie(inviteDie, inviteTextEl, invitePool);
+        rollDie(talkDie, talkTextEl, talkPool);
+      });
+
+      clearBtn.addEventListener("click", () => {
+        inviteTextEl.textContent = "";
+        talkTextEl.textContent = "";
+        inviteTextEl.classList.add("empty");
+        talkTextEl.classList.add("empty");
+      });
+    })();
+  </script>
+</body>
+</html>
