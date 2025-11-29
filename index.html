@@ -388,60 +388,82 @@
         "a memory you have together that still feels vivid."
       ];
 
-      function randomItem(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
+      // state so we don't repeat until we've gone through everything
+    const remaining = {
+      invite: [],
+      talk: []
+    };
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
+    }
 
-      function rollDie(imgEl, textEl, pool) {
-        if (!imgEl) return;
-
-        imgEl.classList.add("rolling");
-
-        const duration = 450;
-        const shuffleInterval = 70;
-        const start = performance.now();
-
-        const intervalId = setInterval(() => {
-          const now = performance.now();
-          if (now - start >= duration) {
-            clearInterval(intervalId);
-
-            const finalFace = 1 + Math.floor(Math.random() * 6);
-            imgEl.dataset.face = finalFace;
-            imgEl.src = diceImages[finalFace] || imgEl.src;
-            imgEl.classList.remove("rolling");
-
-            const text = randomItem(pool);
-            textEl.textContent = text;
-            textEl.classList.remove("empty");
-          } else {
-            const tempFace = 1 + Math.floor(Math.random() * 6);
-            imgEl.dataset.face = tempFace;
-            imgEl.src = diceImages[tempFace] || imgEl.src;
-          }
-        }, shuffleInterval);
+    function getNextNonRepeating(pool, key) {
+      let bucket = remaining[key];
+      if (!bucket || bucket.length === 0) {
+        // refill and shuffle when we've used everything
+        bucket = pool.slice();
+        shuffle(bucket);
+        remaining[key] = bucket;
       }
+      return remaining[key].pop();
+    }
 
-      inviteDie.addEventListener("click", () => {
-        rollDie(inviteDie, inviteTextEl, invitePool);
-      });
+    function rollDie(imgEl, textEl, pool, key) {
+      if (!imgEl) return;
 
-      talkDie.addEventListener("click", () => {
-        rollDie(talkDie, talkTextEl, talkPool);
-      });
+      imgEl.classList.add("rolling");
 
-      rollBothBtn.addEventListener("click", () => {
-        rollDie(inviteDie, inviteTextEl, invitePool);
-        rollDie(talkDie, talkTextEl, talkPool);
-      });
+      const duration = 450;
+      const shuffleInterval = 70;
+      const start = performance.now();
 
-      clearBtn.addEventListener("click", () => {
-        inviteTextEl.textContent = "";
-        talkTextEl.textContent = "";
-        inviteTextEl.classList.add("empty");
-        talkTextEl.classList.add("empty");
-      });
-    })();
-  </script>
+      const intervalId = setInterval(() => {
+        const now = performance.now();
+        if (now - start >= duration) {
+          clearInterval(intervalId);
+
+          const finalFace = 1 + Math.floor(Math.random() * 6);
+          imgEl.dataset.face = finalFace;
+          imgEl.src = diceImages[finalFace] || imgEl.src;
+          imgEl.classList.remove("rolling");
+
+          const text = getNextNonRepeating(pool, key);
+          textEl.textContent = text;
+          textEl.classList.remove("empty");
+        } else {
+          const tempFace = 1 + Math.floor(Math.random() * 6);
+          imgEl.dataset.face = tempFace;
+          imgEl.src = diceImages[tempFace] || imgEl.src;
+        }
+      }, shuffleInterval);
+    }
+
+    inviteDie.addEventListener("click", () => {
+      rollDie(inviteDie, inviteTextEl, invitePool, "invite");
+    });
+
+    talkDie.addEventListener("click", () => {
+      rollDie(talkDie, talkTextEl, talkPool, "talk");
+    });
+
+    rollBothBtn.addEventListener("click", () => {
+      rollDie(inviteDie, inviteTextEl, invitePool, "invite");
+      rollDie(talkDie, talkTextEl, talkPool, "talk");
+    });
+
+    clearBtn.addEventListener("click", () => {
+      inviteTextEl.textContent = "";
+      talkTextEl.textContent = "";
+      inviteTextEl.classList.add("empty");
+      talkTextEl.classList.add("empty");
+      // note: we do NOT reset the remaining arrays here,
+      // so you still don't get repeats until everything is used.
+    });
+  })();
+</script>
 </body>
 </html>
